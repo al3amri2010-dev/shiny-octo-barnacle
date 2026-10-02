@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { HARD_BANK, loadBankPuzzle, pickUnplayed } from '../engine/bank';
 import { generateAsync } from '../engine/generator';
 import type { Difficulty, Digit } from '../engine/types';
 import * as logic from './gameLogic';
@@ -9,6 +10,8 @@ import { useStatsStore } from './statsStore';
 
 interface GameActions {
   loading: boolean;
+  /** Indices of bank puzzles already served for Hard games. */
+  playedHard: number[];
   newGame: (difficulty: Difficulty, seed?: number) => Promise<void>;
   restart: () => void;
   pressDigit: (d: Digit) => void;
@@ -51,9 +54,24 @@ export const useGameStore = create<GameStore>()(
       return {
         ...initialGameData(),
         loading: false,
+        playedHard: [],
         newGame: async (difficulty, seed) => {
           set({ loading: true });
           try {
+            // Unseeded Hard games prefer an unplayed bundled puzzle; otherwise generate.
+            const bankIndex =
+              difficulty === 'hard' && seed === undefined
+                ? pickUnplayed(get().playedHard, HARD_BANK.length, Math.random)
+                : null;
+            if (bankIndex !== null) {
+              const { puzzle, solution } = loadBankPuzzle(HARD_BANK[bankIndex]);
+              set({
+                ...logic.newGameData(difficulty, puzzle, solution),
+                playedHard: [...get().playedHard, bankIndex],
+                loading: false,
+              });
+              return;
+            }
             const { puzzle, solution } = await generateAsync(difficulty, seed);
             set({ ...logic.newGameData(difficulty, puzzle, solution), loading: false });
           } catch (e) {
@@ -84,7 +102,8 @@ export const useGameStore = create<GameStore>()(
       name: 'sudoku-game',
       storage: createJSONStorage(() => AsyncStorage),
       // Transient UI state is not saved; a restored game always starts paused.
-      partialize: (s): GameData => ({
+      partialize: (s): GameData & { playedHard: number[] } => ({
+        playedHard: s.playedHard,
         puzzle: s.puzzle,
         solution: s.solution,
         values: s.values,

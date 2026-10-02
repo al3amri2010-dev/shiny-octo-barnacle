@@ -120,3 +120,25 @@ describe('settingsStore', () => {
     expect(useSettingsStore.getState().theme).toBe('dark');
   });
 });
+
+describe('hard bank in newGame', () => {
+  it('serves an unplayed bank puzzle and records its index', async () => {
+    const { HARD_BANK } = jest.requireActual('../../engine/bank');
+    useGameStore.setState({ playedHard: [] });
+    await useGameStore.getState().newGame('hard');
+    const s = useGameStore.getState();
+    expect(s.playedHard).toHaveLength(1);
+    expect(s.difficulty).toBe('hard');
+    const entry = HARD_BANK[s.playedHard[0]] as string;
+    expect(s.puzzle.map((d) => (d === 0 ? '.' : String(d))).join('')).toBe(entry);
+    expect(s.solution.every((d) => d >= 1)).toBe(true);
+  });
+
+  it('falls back to generation when every bank puzzle was played', async () => {
+    const { HARD_BANK } = jest.requireActual('../../engine/bank');
+    const all = HARD_BANK.map((_: string, i: number) => i);
+    useGameStore.setState({ playedHard: all });
+    await useGameStore.getState().newGame('hard', 3); // seeded: skips bank anyway
+    expect(useGameStore.getState().playedHard).toEqual(all);
+  }, 60000);
+});

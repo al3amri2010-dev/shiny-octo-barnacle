@@ -8,6 +8,7 @@ export interface Palette {
   textMuted: string;
   gridThin: string;
   outline: string;
+  error: string;
 }
 
 export type ThemeName = 'dark' | 'light';
@@ -22,6 +23,7 @@ export const darkPalette: Palette = {
   textMuted: '#8C8E99',
   gridThin: '#3A3C46',
   outline: '#3A3C46',
+  error: '#FF8A8A',
 };
 
 export const lightPalette: Palette = {
@@ -34,6 +36,7 @@ export const lightPalette: Palette = {
   textMuted: '#6B6D7A',
   gridThin: '#D4D6E0',
   outline: '#C4C6D2',
+  error: '#D13B3B',
 };
 
 export const palettes: Record<ThemeName, Palette> = { dark: darkPalette, light: lightPalette };
