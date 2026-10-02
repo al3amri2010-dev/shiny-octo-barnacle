@@ -36,7 +36,7 @@ export function findNakedSubset(
           ),
           units: [unit],
         },
-        explanation: `In ${unitName(unit)}, ${listCells(combo)} can only hold ${listDigits(digits)} between them (a naked ${SIZE_NAME[n]}), so those digits can be removed elsewhere in the ${unit.kind}: ${describeEliminations(eliminations)}.`,
+        explanation: `In ${unitName(unit)}, ${listCells(combo)} can only hold ${listDigits(digits)} between them (a naked ${SIZE_NAME[n]}), so those digits can be removed elsewhere in the ${unit.kind === 'col' ? 'column' : unit.kind}: ${describeEliminations(eliminations)}.`,
       };
     }
   }

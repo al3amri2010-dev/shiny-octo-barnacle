@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { useGameStore } from '@/state/gameStore';
+import { lessonForTechnique } from '@/training/lessons';
 import { useStatsStore } from '@/state/statsStore';
 import { BottomBar } from '@/ui/BottomBar';
 import { Board } from '@/ui/Board';
@@ -116,7 +117,12 @@ export default function GameScreen() {
             <Board size={boardSize} onCellPress={onCellPress} />
           </View>
           <View style={{ flex: 1.3, minHeight: 112, justifyContent: 'center' }}>
-            <HintBanner />
+            <HintBanner
+              onOpenLesson={(t) => {
+                const lesson = lessonForTechnique(t);
+                if (lesson) router.push(`/training/${lesson.id}`);
+              }}
+            />
           </View>
           <NumberPad
             remaining={remaining}

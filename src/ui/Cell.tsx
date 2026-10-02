@@ -26,6 +26,10 @@ export interface CellProps {
   elimMask: number;
   /** Hint placement (stage 2), drawn as a ghost digit. */
   ghost: number;
+  /** Candidates to flash as mistakes (training practice), as a mask. */
+  wrongMask?: number;
+  /** Hex alpha of the unit tint (default '22'). */
+  tintAlpha?: string;
   onPress: (index: number) => void;
 }
 
@@ -69,7 +73,7 @@ function CellView(p: CellProps) {
       style={[
         styles.cell,
         { width: size, height: size },
-        p.hintTint && { backgroundColor: palette.accent + '22' },
+        p.hintTint && { backgroundColor: palette.accent + (p.tintAlpha ?? '22') },
         p.selected && { backgroundColor: palette.surface, borderRadius: size * 0.2 },
         p.hintRing && {
           borderWidth: 2,
@@ -134,6 +138,7 @@ function CellView(p: CellProps) {
             const elim = (p.elimMask & m) !== 0;
             const on = elim || (p.notes & m) !== 0 || (p.hintCands & m) !== 0;
             if (!on) return null;
+            const flash = ((p.wrongMask ?? 0) & m) !== 0;
             const emphasised = d === p.noteDigit || (p.hintCands & m) !== 0;
             return (
               <View
@@ -146,6 +151,8 @@ function CellView(p: CellProps) {
                   height: markSize,
                   alignItems: 'center',
                   justifyContent: 'center',
+                  borderRadius: markSize / 2,
+                  backgroundColor: flash ? palette.error + '66' : 'transparent',
                 }}
               >
                 <Text
