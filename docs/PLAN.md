@@ -94,3 +94,7 @@ Each milestone = one or more Sonnet tasks → Opus review (diff read, `npm test`
 - **M6 Home, Stats, Theme toggle.**
 - **M7 Training** — rules intro + lesson per technique: explanation, animated worked example using Step highlights, endless practice (generate a puzzle, advance with logical solver until the technique is the next step, user must perform it).
 - **M8 Polish** — haptics, completion screen, accessibility labels, web check, README.
+
+## Follow-ups from review
+
+- **Hard generation is slow (~3.5 s avg, falls back to Medium 4/10).** Puzzles that strictly need triples/quads/X-Wing are rare (~1–2% of attempts). Fix in M5: (1) `scripts/build-puzzle-bank.ts` runs our own generator offline to produce a bundled bank of ~200 Hard puzzles (`src/engine/bank/hard.json`), used when available; (2) background prefetch of the next puzzle per difficulty after app start.
