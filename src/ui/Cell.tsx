@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text } from './Text';
 
 import type { Palette } from './theme';
 
@@ -33,6 +34,14 @@ export interface CellProps {
   onPress: (index: number) => void;
 }
 
+/** Screen-reader label: "Row 3, column 5, 7, given" / "Row 3, column 5, empty, notes 1 3". */
+export function cellLabel(r: number, c: number, value: number, given: boolean, notes: number) {
+  const pos = `Row ${r + 1}, column ${c + 1}`;
+  if (value !== 0) return `${pos}, ${value}${given ? ', given' : ''}`;
+  const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter((d) => (notes & (1 << (d - 1))) !== 0);
+  return digits.length ? `${pos}, empty, notes ${digits.join(' ')}` : `${pos}, empty`;
+}
+
 function CellView(p: CellProps) {
   const { size, palette, value, index } = p;
   const r = Math.floor(index / 9);
@@ -59,16 +68,14 @@ function CellView(p: CellProps) {
     if (p.wrong) textColor = palette.error;
   }
 
-  const label =
-    value !== 0
-      ? `r${r + 1}c${c + 1} ${value}${p.given ? ' given' : ''}`
-      : `r${r + 1}c${c + 1} empty`;
+  const label = cellLabel(r, c, value, p.given, p.notes);
 
   return (
     <Pressable
       testID={`cell-${index}`}
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={{ selected: p.selected || p.highlighted }}
       onPress={() => p.onPress(index)}
       style={[
         styles.cell,

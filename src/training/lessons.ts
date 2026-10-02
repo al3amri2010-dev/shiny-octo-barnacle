@@ -10,7 +10,7 @@ export type Page =
    * A real position from the training bank (index `example` of the lesson's technique) that can
    * be stepped through. `plain` shows the board with its notes and no step-through control.
    */
-  | { kind: 'diagram'; example: number; caption: string; plain?: boolean }
+  | { kind: 'diagram'; example: number; caption: string; result?: string; plain?: boolean }
   /** Rules lesson: tap Row / Column / Box to light up a unit of the sample grid. */
   | { kind: 'units'; title: string; caption: string }
   /** Rules lesson: fill the one empty cell of the nearly solved sample grid. */
@@ -40,7 +40,12 @@ const TIP = (...body: string[]): Page => ({
   body,
   tip: true,
 });
-const D = (example: number, caption: string): Page => ({ kind: 'diagram', example, caption });
+const D = (example: number, caption: string, result: string): Page => ({
+  kind: 'diagram',
+  example,
+  caption,
+  result,
+});
 
 export const LESSONS: Lesson[] = [
   {
@@ -89,7 +94,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The shaded unit has a single empty cell. Find the digit it is missing and write it in.',
+        'The shaded unit has a single empty cell, and it is ringed. Eight digits are already in the unit, so only one is missing.',
+        'The missing digit goes into the ringed cell. The unit is now complete.',
       ),
       TIP(
         'Look for units that are almost full. Count the empty cells in each one.',
@@ -111,7 +117,11 @@ export const LESSONS: Lesson[] = [
         'Cross those digits off in your head. If eight digits are ruled out, the ninth is the answer.',
         'It is called naked because the answer sits right in the cell. You do not need to look at any other cell.',
       ),
-      D(0, 'Look at the ringed cell. Its row, column and box already contain every digit but one.'),
+      D(
+        0,
+        'Look at the ringed cell. Its row, column and box already contain every digit but one.',
+        'Only one digit is left for the ringed cell, so it is written in.',
+      ),
       TIP(
         'Start with cells that sit in crowded areas, where their row, column and box all meet many filled cells.',
         'If you keep notes, a cell with only one note left is a naked single.',
@@ -135,8 +145,13 @@ export const LESSONS: Lesson[] = [
       D(
         0,
         'In the shaded unit, one digit has only a single cell left to live in. That cell is ringed.',
+        'The digit is written into the ringed cell, the only place it can go in this unit.',
       ),
-      D(1, 'Another example. The same idea works for a row or a column, not only for a box.'),
+      D(
+        1,
+        'Another example. The same idea works for a row or a column, not only for a box.',
+        'Again the digit is written into the only cell where it fits.',
+      ),
       TIP(
         'Choose a digit that appears many times on the board, since it blocks lots of cells. Check each box that is still missing it.',
         'Then do the same with rows and columns. This sweep is often called cross-hatching.',
@@ -190,7 +205,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'Inside the shaded box, the ringed candidates line up. The red candidates in the same line, beyond the box, can go.',
+        'Inside the shaded box, every place for the highlighted digit lies on one line. Those cells are ringed.',
+        'The digit must land on that line inside the box, so it cannot also go anywhere else along the line. The red candidates outside the box are struck.',
       ),
       TIP(
         'Look at a box and a digit with only two or three candidate cells left. Do they share a row or column?',
@@ -214,7 +230,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'In the shaded line, every candidate for the digit sits in one box. The red candidates are in that box but off the line.',
+        'In the shaded line, every place for the highlighted digit falls inside a single box. Those cells are ringed.',
+        "The line's digit must come from that box, so the box's other cells cannot hold it. The red candidates in the box, off the line, are struck.",
       ),
       TIP(
         'Pointing starts from a box and looks along a line. Claiming starts from a line and looks into a box.',
@@ -238,7 +255,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The two ringed cells hold the same pair of candidates. The red candidates in the rest of the unit can be removed.',
+        'The two ringed cells hold the same pair of candidates and nothing else.',
+        'Those two digits must fill those two cells, so no other cell in the unit can use them. The red candidates are struck.',
       ),
       TIP(
         'Scan a unit for cells with exactly two notes. Two of them with the same notes are a pair.',
@@ -262,7 +280,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The ringed cells are the only places for the highlighted digits in this unit. The red candidates are the extras that can be removed.',
+        'Two digits appear as candidates in just two cells of this unit. Those cells are ringed.',
+        'Those two cells must hold exactly those two digits, so every other candidate inside them is struck in red.',
       ),
       TIP(
         'Hidden pairs look messy because the two cells have extra notes. Ignore those and count where each digit can go.',
@@ -286,7 +305,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The ringed cells use only three digits between them. The red candidates elsewhere in the unit can be removed.',
+        'Three ringed cells use only three digits between them.',
+        'The three digits must fill those three cells, so the rest of the unit cannot use them. The red candidates are struck.',
       ),
       TIP(
         'Look at cells with two or three notes. Check whether three of them draw only on the same three digits.',
@@ -310,7 +330,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The three ringed cells are the only homes for the highlighted digits. The red candidates are extras that can be removed.',
+        'Three digits appear as candidates in just three cells of this unit. Those cells are ringed.',
+        'Those three cells must hold exactly those three digits, so every other candidate inside them is struck in red.',
       ),
       TIP(
         'Pick out three digits that each have two or three possible cells in the unit, all in the same group of three cells.',
@@ -335,7 +356,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The ringed cells form the rectangle for the highlighted digit. The red candidates sit in the same lines, outside the rectangle.',
+        'The highlighted digit has just two places in each of two rows, and they line up in the same two columns. The four ringed cells form a rectangle.',
+        'The digit takes two opposite corners of the rectangle, so it is ruled out elsewhere in those columns. The red candidates are struck.',
       ),
       TIP(
         'Look for a digit that has just two candidate cells in several rows. Compare the columns they use.',
@@ -359,7 +381,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The ringed cells draw on just four digits. The red candidates in the other cells of the unit can go.',
+        'Four ringed cells draw on just four digits between them.',
+        'The four digits must fill those four cells, so the rest of the unit cannot use them. The red candidates are struck.',
       ),
       TIP(
         'Quads are rare, because most of them contain a smaller pair or triple that you would find first.',
@@ -383,7 +406,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The ringed cells are the only homes for the highlighted digits. The red candidates are extras that can be removed.',
+        'Four digits appear as candidates in just four cells of this unit. Those cells are ringed.',
+        'Those four cells must hold exactly those four digits, so every other candidate inside them is struck in red.',
       ),
       TIP(
         'Hidden quads are very rare. Only hunt for one when a unit still has many empty cells and nothing simpler works.',
@@ -407,7 +431,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The ringed cells are all the places the digit can go in three rows. The red candidates are in the same three columns, in other rows.',
+        'In three rows, the highlighted digit can only go in the same three columns. The ringed cells are all its places in those rows.',
+        'The digit will fill those three columns using those rows, so it is ruled out elsewhere in the columns. The red candidates are struck.',
       ),
       TIP(
         'Each row may show two or three candidate cells, not always all three columns. That is fine.',
@@ -432,7 +457,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The ringed cells are the two towers. The red candidates are in cells that see both roof cells.',
+        'The ringed cells are two towers of the same digit, joined at the base. Each tower has a roof cell at its top.',
+        'One roof must hold the digit, so any cell that sees both roofs cannot. The red candidates are struck.',
       ),
       TIP(
         'Look for a digit with exactly two places in two different lines. If they share a column, the roof is the other pair.',
@@ -457,7 +483,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The ringed cells are the kite. Two share a box and the other two are the far ends. The red candidates see both far ends.',
+        'The ringed cells form a kite. Two of them share a box, and the other two are the far ends of the kite.',
+        'One far end must hold the digit, so any cell that sees both far ends cannot. The red candidates are struck.',
       ),
       TIP(
         'Draw an imaginary string along each line of two candidates. Look for strings that touch in a box.',
@@ -482,7 +509,8 @@ export const LESSONS: Lesson[] = [
       ),
       D(
         0,
-        'The ringed cells are the pivot and its pincers. The red candidate sits in a cell that sees both pincers.',
+        'The ringed cells are a pivot with two candidates and two pincers that each share one of those candidates.',
+        'Whichever way the pivot goes, one pincer holds the shared digit, so a cell that sees both pincers cannot. The red candidate is struck.',
       ),
       TIP(
         'Start from cells with exactly two notes. Look for a pivot that has two such neighbours with a common digit.',

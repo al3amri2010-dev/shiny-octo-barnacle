@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from './Text';
 
 import { useGameStore } from '../state/gameStore';
 import { useTheme } from './useTheme';

@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
 import { useTrainingStore, PRACTICE_GOAL } from '../../state/trainingStore';
 import { toPosition } from '../../training/bank';
-import { RULES_BLANK, RULES_SOLUTION, lessonById } from '../../training/lessons';
+import { LESSONS, RULES_BLANK, RULES_SOLUTION, lessonById } from '../../training/lessons';
 import { DiagramPage, stagesFor } from '../DiagramPage';
 import { HintBanner } from '../HintBanner';
 import { useGameStore } from '../../state/gameStore';
@@ -12,7 +12,7 @@ import { PracticeView } from '../PracticeView';
 jest.mock('@react-native-async-storage/async-storage', () =>
   jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
-jest.mock('@expo/vector-icons', () => ({ Ionicons: () => null }));
+jest.mock('@expo/vector-icons', () => ({ Ionicons: () => null, MaterialIcons: () => null }));
 
 beforeEach(() => useTrainingStore.getState().reset());
 
@@ -107,6 +107,20 @@ describe('DiagramPage', () => {
     expect(screen.getByTestId('stage-text').props.children).toContain(position.step.explanation);
     fireEvent.press(screen.getByTestId('step-through')); // replay
     expect(screen.getByTestId('stage-text').props.children).toMatch(/Press Step/);
+  });
+
+  it('shows the pattern caption until the result stage, then the result caption', () => {
+    const position = toPosition('nakedPair', 0);
+    render(<DiagramPage position={position} caption="Pattern text" result="Result text" />);
+    expect(screen.getByTestId('diagram-caption').props.children).toBe('Pattern text');
+    const stages = stagesFor(position);
+    for (let i = 1; i < stages.length; i++) fireEvent.press(screen.getByTestId('step-through'));
+    expect(screen.getByTestId('diagram-caption').props.children).toBe('Result text');
+  });
+
+  it('pattern captions never mention red candidates', () => {
+    for (const l of LESSONS)
+      for (const p of l.pages) if (p.kind === 'diagram') expect(p.caption).not.toMatch(/\bred\b/i);
   });
 
   it('plain diagrams have no stepper', () => {

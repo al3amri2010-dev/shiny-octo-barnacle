@@ -1,9 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from './useTheme';
 
-type IconName = React.ComponentProps<typeof Ionicons>['name'];
+type IonName = React.ComponentProps<typeof Ionicons>['name'];
+type MaterialName = React.ComponentProps<typeof MaterialIcons>['name'];
+type Family = 'ion' | 'material';
 
 export interface BottomBarProps {
   notesActive: boolean;
@@ -15,13 +17,49 @@ export interface BottomBarProps {
 
 export function BottomBar(p: BottomBarProps) {
   const palette = useTheme();
-  const items: { id: string; icon: IconName; label: string; onPress: () => void; on?: boolean }[] =
-    [
-      { id: 'restart', icon: 'refresh', label: 'Restart', onPress: p.onRestart },
-      { id: 'help', icon: 'bulb', label: 'Help', onPress: p.onHelp },
-      { id: 'notes', icon: 'pencil', label: 'Notes', onPress: p.onNotes, on: p.notesActive },
-      { id: 'undo', icon: 'arrow-undo', label: 'Undo', onPress: p.onUndo },
-    ];
+  const items: {
+    id: string;
+    icon: string;
+    family: Family;
+    label: string;
+    hint: string;
+    onPress: () => void;
+    on?: boolean;
+  }[] = [
+    {
+      id: 'restart',
+      icon: 'refresh',
+      family: 'material',
+      label: 'Restart',
+      hint: 'Starts this puzzle over',
+      onPress: p.onRestart,
+    },
+    {
+      id: 'help',
+      icon: 'bulb',
+      family: 'ion',
+      label: 'Help',
+      hint: 'Opens hints and checking tools',
+      onPress: p.onHelp,
+    },
+    {
+      id: 'notes',
+      icon: 'pencil',
+      family: 'ion',
+      label: 'Notes',
+      hint: 'Switches pencil marks on or off',
+      onPress: p.onNotes,
+      on: p.notesActive,
+    },
+    {
+      id: 'undo',
+      icon: 'undo',
+      family: 'material',
+      label: 'Undo',
+      hint: 'Takes back your last move',
+      onPress: p.onUndo,
+    },
+  ];
   return (
     <View style={styles.bar}>
       {items.map((it) => (
@@ -30,11 +68,24 @@ export function BottomBar(p: BottomBarProps) {
           testID={`bar-${it.id}`}
           accessibilityRole="button"
           accessibilityLabel={it.label}
+          accessibilityHint={it.hint}
           accessibilityState={{ selected: !!it.on }}
           onPress={it.onPress}
           style={[styles.item, it.on && { backgroundColor: palette.accent + '33' }]}
         >
-          <Ionicons name={it.icon} size={30} color={it.on ? palette.accent : palette.text} />
+          {it.family === 'material' ? (
+            <MaterialIcons
+              name={it.icon as MaterialName}
+              size={32}
+              color={it.on ? palette.accent : palette.text}
+            />
+          ) : (
+            <Ionicons
+              name={it.icon as IonName}
+              size={30}
+              color={it.on ? palette.accent : palette.text}
+            />
+          )}
         </Pressable>
       ))}
     </View>

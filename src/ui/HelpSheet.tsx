@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from './Text';
 
 import { useGameStore } from '../state/gameStore';
 import { useTheme } from './useTheme';
@@ -13,11 +14,35 @@ export function HelpSheet({ visible, onClose }: { visible: boolean; onClose: () 
   const validate = useGameStore((s) => s.validate);
   const autoNotes = useGameStore((s) => s.autoNotes);
 
-  const actions: { id: string; icon: IconName; label: string; run: () => void }[] = [
-    { id: 'hint', icon: 'bulb', label: 'Hint', run: requestHint },
-    { id: 'mismatches', icon: 'alert-circle', label: 'Mismatches', run: showMismatches },
-    { id: 'validate', icon: 'checkmark', label: 'Validate', run: validate },
-    { id: 'autonotes', icon: 'pencil', label: 'Auto Notes', run: autoNotes },
+  const actions: { id: string; icon: IconName; label: string; hint: string; run: () => void }[] = [
+    {
+      id: 'hint',
+      icon: 'bulb',
+      label: 'Hint',
+      hint: 'Explains the next technique to use',
+      run: requestHint,
+    },
+    {
+      id: 'mismatches',
+      icon: 'alert-circle',
+      label: 'Mismatches',
+      hint: 'Marks entries that differ from the solution',
+      run: showMismatches,
+    },
+    {
+      id: 'validate',
+      icon: 'checkmark',
+      label: 'Validate',
+      hint: 'Counts the errors on the board',
+      run: validate,
+    },
+    {
+      id: 'autonotes',
+      icon: 'pencil',
+      label: 'Auto Notes',
+      hint: 'Fills every empty cell with its candidates',
+      run: autoNotes,
+    },
   ];
 
   const pill = [styles.pill, { borderColor: palette.outline }];
@@ -27,6 +52,7 @@ export function HelpSheet({ visible, onClose }: { visible: boolean; onClose: () 
       <View style={styles.backdrop}>
         <View
           testID="help-sheet"
+          accessibilityViewIsModal
           style={[
             styles.card,
             { backgroundColor: palette.background, borderColor: palette.outline },
@@ -42,6 +68,7 @@ export function HelpSheet({ visible, onClose }: { visible: boolean; onClose: () 
               testID={`help-${a.id}`}
               accessibilityRole="button"
               accessibilityLabel={a.label}
+              accessibilityHint={a.hint}
               style={pill}
               onPress={() => {
                 a.run();
@@ -56,7 +83,7 @@ export function HelpSheet({ visible, onClose }: { visible: boolean; onClose: () 
           <Pressable
             testID="help-close"
             accessibilityRole="button"
-            accessibilityLabel="Close"
+            accessibilityLabel="Close help"
             style={pill}
             onPress={onClose}
           >

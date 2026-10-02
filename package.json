@@ -9,11 +9,13 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
+    "e2e": "node scripts/e2e.cjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@expo-google-fonts/outfit": "^0.4.3",
     "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "expo": "~57.0.26",

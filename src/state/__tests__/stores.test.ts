@@ -2,7 +2,7 @@ import { generate } from '../../engine/generator';
 import { mulberry32 } from '../../engine/rng';
 import type { Digit } from '../../engine/types';
 import { newGameData } from '../gameLogic';
-import { useGameStore } from '../gameStore';
+import { clearPrefetched, hasPrefetched, useGameStore } from '../gameStore';
 import { useSettingsStore } from '../settingsStore';
 import { averageOf, bestOf, countOf, useStatsStore } from '../statsStore';
 
@@ -141,4 +141,33 @@ describe('hard bank in newGame', () => {
     await useGameStore.getState().newGame('hard', 3); // seeded: skips bank anyway
     expect(useGameStore.getState().playedHard).toEqual(all);
   }, 60000);
+});
+
+describe('background prefetch', () => {
+  beforeEach(() => clearPrefetched());
+
+  it('prefetch stores a puzzle that the next unseeded newGame uses instantly', async () => {
+    expect(hasPrefetched('easy')).toBe(false);
+    await useGameStore.getState().prefetch('easy');
+    expect(hasPrefetched('easy')).toBe(true);
+    await useGameStore.getState().newGame('easy');
+    expect(hasPrefetched('easy')).toBe(false); // consumed; a follow-up job is running
+    const s = useGameStore.getState();
+    expect(s.status).toBe('playing');
+    expect(s.puzzle.filter((v) => v !== 0).length).toBeGreaterThanOrEqual(36);
+    await useGameStore.getState().prefetch('easy'); // let the follow-up job finish
+    expect(hasPrefetched('easy')).toBe(true);
+  }, 30000);
+
+  it('seeded games ignore the prefetched puzzle', async () => {
+    await useGameStore.getState().prefetch('easy');
+    await useGameStore.getState().newGame('easy', 5);
+    expect(hasPrefetched('easy')).toBe(true);
+  }, 30000);
+
+  it('hard does not prefetch while the bank has unplayed puzzles', async () => {
+    useGameStore.setState({ playedHard: [] });
+    await useGameStore.getState().prefetch('hard');
+    expect(hasPrefetched('hard')).toBe(false);
+  });
 });

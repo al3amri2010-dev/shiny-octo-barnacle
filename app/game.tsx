@@ -1,14 +1,8 @@
 import * as Haptics from 'expo-haptics';
 import { Redirect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  AppState,
-  Platform,
-  Text,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import { ActivityIndicator, AppState, Platform, View, useWindowDimensions } from 'react-native';
+import { Text } from '@/ui/Text';
 
 import { useGameStore } from '@/state/gameStore';
 import { lessonForTechnique } from '@/training/lessons';
@@ -171,7 +165,7 @@ export default function GameScreen() {
         testID="win-dialog"
         buttons={[
           { id: 'new', label: 'New Game', primary: true, onPress: () => void startNew() },
-          { id: 'home', label: 'Home', onPress: () => router.replace('/') },
+          { id: 'home', label: 'Home', onPress: () => router.dismissTo('/') },
         ]}
       >
         <Text style={{ color: palette.text, fontSize: 28, fontWeight: '700' }}>

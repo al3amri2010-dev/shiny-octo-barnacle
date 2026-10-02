@@ -2,17 +2,33 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { HARD_BANK, loadBankPuzzle, pickUnplayed } from '../engine/bank';
-import { generateAsync } from '../engine/generator';
+import { generateAsync, type Generated } from '../engine/generator';
 import type { Difficulty, Digit } from '../engine/types';
 import * as logic from './gameLogic';
 import { initialGameData, type GameData } from './gameLogic';
 import { useStatsStore } from './statsStore';
+
+/** Next puzzle per difficulty, generated in the background. In memory only; never persisted. */
+const prefetched: Partial<Record<Difficulty, Generated>> = {};
+const inFlight: Partial<Record<Difficulty, Promise<void>>> = {};
+
+/** True when a background-generated puzzle is waiting for this difficulty. */
+export function hasPrefetched(difficulty: Difficulty): boolean {
+  return prefetched[difficulty] !== undefined;
+}
+
+/** Drops all prefetched puzzles (tests). */
+export function clearPrefetched(): void {
+  for (const d of Object.keys(prefetched) as Difficulty[]) delete prefetched[d];
+}
 
 interface GameActions {
   loading: boolean;
   /** Indices of bank puzzles already served for Hard games. */
   playedHard: number[];
   newGame: (difficulty: Difficulty, seed?: number) => Promise<void>;
+  /** Generates the next puzzle for `difficulty` in the background (no-op if already done/running). */
+  prefetch: (difficulty: Difficulty) => Promise<void>;
   restart: () => void;
   pressDigit: (d: Digit) => void;
   pressCell: (i: number) => void;
@@ -72,12 +88,41 @@ export const useGameStore = create<GameStore>()(
               });
               return;
             }
-            const { puzzle, solution } = await generateAsync(difficulty, seed);
+            // A prefetched puzzle (or one still being generated) is used for unseeded games.
+            if (seed === undefined) await inFlight[difficulty];
+            const ready = seed === undefined ? prefetched[difficulty] : undefined;
+            if (ready) delete prefetched[difficulty];
+            const { puzzle, solution } = ready ?? (await generateAsync(difficulty, seed));
             set({ ...logic.newGameData(difficulty, puzzle, solution), loading: false });
+            if (seed === undefined) void get().prefetch(difficulty);
           } catch (e) {
             set({ loading: false });
             throw e;
           }
+        },
+        prefetch: (difficulty) => {
+          if (prefetched[difficulty]) return Promise.resolve();
+          const running = inFlight[difficulty];
+          if (running) return running;
+          // Hard serves the bundled bank first, so nothing to prepare while it has unplayed puzzles.
+          if (
+            difficulty === 'hard' &&
+            pickUnplayed(get().playedHard, HARD_BANK.length, Math.random) !== null
+          ) {
+            return Promise.resolve();
+          }
+          const job = generateAsync(difficulty)
+            .then((g) => {
+              prefetched[difficulty] = g;
+            })
+            .catch(() => {
+              // best-effort: newGame generates on demand instead
+            })
+            .finally(() => {
+              delete inFlight[difficulty];
+            });
+          inFlight[difficulty] = job;
+          return job;
         },
         restart: () => apply(logic.restart),
         pressDigit: (d) => apply((s) => logic.pressDigit(s, d)),

@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { useGameStore } from '../../state/gameStore';
+import { BottomBar } from '../BottomBar';
+import { cellLabel } from '../Cell';
 import { HelpSheet } from '../HelpSheet';
 import { NumberPad } from '../NumberPad';
 
@@ -8,7 +10,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
-jest.mock('@expo/vector-icons', () => ({ Ionicons: () => null }));
+jest.mock('@expo/vector-icons', () => ({ Ionicons: () => null, MaterialIcons: () => null }));
 
 describe('NumberPad', () => {
   const base = {
@@ -71,5 +73,38 @@ describe('HelpSheet', () => {
     expect(onClose).toHaveBeenCalledTimes(4);
     fireEvent.press(screen.getByTestId('help-close'));
     expect(onClose).toHaveBeenCalledTimes(5);
+  });
+});
+
+describe('accessibility labels', () => {
+  it('describes cells', () => {
+    expect(cellLabel(2, 4, 7, true, 0)).toBe('Row 3, column 5, 7, given');
+    expect(cellLabel(2, 4, 7, false, 0)).toBe('Row 3, column 5, 7');
+    expect(cellLabel(2, 4, 0, false, 0b101)).toBe('Row 3, column 5, empty, notes 1 3');
+    expect(cellLabel(0, 0, 0, false, 0)).toBe('Row 1, column 1, empty');
+  });
+
+  it('labels pad keys and bottom bar buttons', () => {
+    render(
+      <>
+        <NumberPad
+          remaining={[6, 6, 7, 3, 7, 8, 0, 5, 5]}
+          selectedDigit={null}
+          eraseActive={false}
+          onDigit={jest.fn()}
+          onErase={jest.fn()}
+        />
+        <BottomBar
+          notesActive={false}
+          onRestart={jest.fn()}
+          onHelp={jest.fn()}
+          onNotes={jest.fn()}
+          onUndo={jest.fn()}
+        />
+      </>,
+    );
+    expect(screen.getByLabelText('Digit 4, 3 remaining')).toBeTruthy();
+    for (const l of ['Restart', 'Help', 'Notes', 'Undo'])
+      expect(screen.getByLabelText(l)).toBeTruthy();
   });
 });

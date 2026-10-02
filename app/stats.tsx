@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/ui/Text';
 
 import type { Difficulty } from '@/engine/types';
 import { useStatsStore } from '@/state/statsStore';

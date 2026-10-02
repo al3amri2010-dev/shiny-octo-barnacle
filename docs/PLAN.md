@@ -104,5 +104,13 @@ Each milestone = one or more Sonnet tasks → Opus review (diff read, `npm test`
 ## Follow-ups from review
 
 - **Hard generation is slow (~3.5 s avg, falls back to Medium 4/10).** Puzzles that strictly need triples/quads/X-Wing are rare (~1–2% of attempts). Fix in M5: (1) `scripts/build-puzzle-bank.ts` runs our own generator offline to produce a bundled bank of ~200 Hard puzzles (`src/engine/bank/hard.json`), used when available; (2) background prefetch of the next puzzle per difficulty after app start.
-- **M8 polish from M5 review:** rounded geometric font like the reference (e.g. Outfit/Lexend via @expo-google-fonts), undo icon as Material `undo` curved arrow, background prefetch of the next puzzle per difficulty, browser-driven test of a full solve → win dialog.
+- **M8 polish (done):** rounded geometric font like the reference (e.g. Outfit/Lexend via @expo-google-fonts), undo icon as Material `undo` curved arrow, background prefetch of the next puzzle per difficulty, browser-driven test of a full solve → win dialog.
 - **Dependency pins:** react/react-dom/react-test-renderer pinned to 19.2.3 and reanimated 4.5.1 / worklets 0.10.1 to match Expo SDK 57 (`expo/bundledNativeModules.json`). Don't bump them independently of the SDK.
+
+## M8 notes (polish)
+
+- Font: Outfit (`@expo-google-fonts/outfit`), loaded in `app/_layout.tsx`; `src/ui/Text.tsx` wraps RN `Text` and maps `fontWeight` onto the weight files. Use it instead of RN's `Text`.
+- Icons: Material `refresh` / `undo` in the bottom bar (matches the reference), Ionicons elsewhere.
+- Prefetch: `gameStore.prefetch(d)` keeps one generated puzzle per difficulty in memory (not persisted). Unseeded `newGame` uses it, then prefetches the next. Hard prefers the bank.
+- Training captions: diagram pages carry a pattern `caption` and a `result` caption shown at the result stage.
+- E2E: `npm run e2e` (`scripts/e2e.cjs`, Playwright + preinstalled Chromium); not part of `npm test`.

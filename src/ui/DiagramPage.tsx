@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Text } from './Text';
 
 import type { Position } from '../training/bank';
 import { BoardView, stepOverlay, type OverlayLevel } from './BoardView';
@@ -54,10 +55,13 @@ function stageText(position: Position, level: OverlayLevel): string {
 export function DiagramPage({
   position,
   caption,
+  result,
   plain,
 }: {
   position: Position;
   caption: string;
+  /** Caption for the result stage (removals or placement); defaults to `caption`. */
+  result?: string;
   plain?: boolean;
 }) {
   const palette = useTheme();
@@ -71,7 +75,7 @@ export function DiagramPage({
   return (
     <View style={styles.wrap}>
       <Text testID="diagram-caption" style={[styles.caption, { color: palette.text }]}>
-        {caption}
+        {level === 3 && result ? result : caption}
       </Text>
       <MiniBoard position={position} size={size} level={level} />
       {!plain && (

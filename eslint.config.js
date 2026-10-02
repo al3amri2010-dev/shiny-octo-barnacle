@@ -5,5 +5,9 @@ const prettier = require('eslint-config-prettier/flat');
 module.exports = defineConfig([
   expo,
   prettier,
+  {
+    files: ['scripts/**/*.cjs'],
+    languageOptions: { sourceType: 'commonjs', globals: { __dirname: 'readonly' } },
+  },
   { ignores: ['dist/*', '.expo/*', 'node_modules/*', 'coverage/*'] },
 ]);
