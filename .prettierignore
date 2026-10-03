@@ -1,0 +1,8 @@
+node_modules
+dist
+.expo
+package-lock.json
+.claude
+docs
+CLAUDE.md
+src/training/bank.json
